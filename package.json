@@ -4,7 +4,7 @@
   "description": "Embed a spreadsheet into your webpage.",
   "main": "dist/embedsheet.js",
   "directories": {
-    "example": "examples"
+    "example": "example"
   },
   "scripts": {
     "start": "webpack-dev-server --open --mode=development",
