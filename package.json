@@ -1,0 +1,31 @@
+{
+  "name": "embedsheet",
+  "version": "0.0.1",
+  "description": "Embed a spreadsheet into your webpage.",
+  "main": "dist/embedsheet.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --open --mode=development",
+    "build": "webpack -p",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ChaseOnTheWeb/embedsheet.git"
+  },
+  "author": "Wright State University",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ChaseOnTheWeb/embedsheet/issues"
+  },
+  "homepage": "https://github.com/ChaseOnTheWeb/embedsheet#readme",
+  "devDependencies": {
+    "lokijs": "^1.5.5",
+    "webpack": "^4.28.0",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10",
+    "xlsx": "^0.14.1"
+  }
+}
