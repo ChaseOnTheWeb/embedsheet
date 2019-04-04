@@ -8,6 +8,11 @@
 import XLSX from 'xlsx';
 import loki from 'lokijs';
 
+// We don't want all the codepages from cpexcel.js because it makes the script
+// huge. However, we may need some of the file encoding utility functions.
+window.cptable = {};
+require('codepage/cputils');
+
 export default function EmbedSheetData(data, options) {
   this.db = new loki();
   this.items = this.db.addCollection('item');
