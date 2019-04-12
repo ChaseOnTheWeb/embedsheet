@@ -26,7 +26,11 @@ export default function EmbedSheetData(data, options) {
 
   if (this.options.columns) {
     var columns = this.options.columns
-      .concat(this.options.sortby.map(function (v) { return Array.isArray(v) ? v[0] : v; }), this.options.filters.map(function (v) { return v.col; }))
+      .concat(
+        this.options.sortby.map(function (v) { return Array.isArray(v) ? v[0] : v; }),
+        this.options.filters.map(function (v) { return v.col; }),
+        Object.keys(this.options.query)
+        )
       .sort()
       .filter(function (v, i, a) { return v != a[i - 1]; });
   }
