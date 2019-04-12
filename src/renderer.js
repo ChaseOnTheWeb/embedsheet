@@ -8,65 +8,109 @@
 export default function EmbedSheetRenderer(store, options) {
   this.store = store;
   this.options = options;
-  this.page = 0;
+  this.activePage = 0;
+  this.filterConditions = {};
+  this.component = document.createElement('div');
+}
+
+EmbedSheetRenderer.prototype.getPagedData = function (page) {
+  var conditions = Object.assign({}, this.options.query, this.filterConditions);
+
+  var query = this.store.pagedQuery(conditions, page);
+  this.activePage = query.page;
+
+  var event = new CustomEvent('datarefresh', { detail: { query: query } });
+  this.component.dispatchEvent(event);
 }
 
 EmbedSheetRenderer.prototype.render = function () {
-  var frag = document.createDocumentFragment();
   var tableContainer = document.createElement('div');
-  var filters = document.createElement('form');
-  var total = document.createElement('output');
-  var _this = this;
+  tableContainer.classList.add('table-container');
 
-  function getData() {
-    var conditions = Object.create(_this.options.query);
+  this.component.appendChild(this.renderFilters());
+  this.component.appendChild(this.renderPager());
+  this.component.appendChild(tableContainer);
+  this.component.appendChild(this.renderPager());
 
-    for (var i = 0, len = filters.elements.length; i < len; ++i) {
-      var elem = filters.elements[i];
-
-      if (elem.name && elem.name.indexOf('filter_') === 0 && elem.value) {
-        conditions[elem.name.slice(7)] = elem.type == 'text' ? { '$regex': [elem.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'] } : { '$aeq': elem.value };
-      }
-    }
-
-    var data = _this.store.pagedQuery(conditions, _this.page);
-    _this.page = data.page;
-    total.innerHTML = "Page " + (data.page + 1) + " of " + (data.max_pages + 1);
-    tableContainer.innerHTML = _this.renderTable(data.data, _this.options);
+  var updateTable = function (event) {
+    var query = event.detail.query;
+    tableContainer.innerHTML = this.renderTable(query.data);
+    this.component.scrollIntoView({ behavior: "smooth" });
+    tableContainer.focus();
   }
 
-  filters.addEventListener('change', getData, false);
-  filters.addEventListener('keyup', getData, false);
+  this.component.addEventListener('datarefresh', updateTable.bind(this), true);
+
+  this.getPagedData(0);
+
+  return this.component;
+}
+
+EmbedSheetRenderer.prototype.renderPager = function () {
+  var container = document.createElement('nav');
+  var total = document.createElement('output');
+  var prevButton = document.createElement('button');
+  var nextButton = document.createElement('button');
+
+  container.classList.add('embed-pager');
+  container.setAttribute('aria-label', 'Data table navigation');
+
+  total.classList.add('embed-pager-current');
+
+  prevButton.classList.add('embed-pager-previous');
+  prevButton.innerHTML = "Previous";
+  prevButton.setAttribute('data-pager-jump', '-1');
+
+  nextButton.classList.add('embed-pager-next');
+  nextButton.innerHTML = "Next";
+  nextButton.setAttribute('data-pager-jump', '+1');
+
+  container.appendChild(total);
+  container.appendChild(prevButton);
+  container.appendChild(nextButton);
+
+  var onClick = function(event) {
+    if (event.target.hasAttribute('data-pager-jump')) {
+      var newPage = this.activePage + Number(event.target.getAttribute('data-pager-jump'));
+
+      this.getPagedData(newPage);
+    }
+  };
+
+  container.addEventListener('click', onClick.bind(this), false);
+
+  this.component.addEventListener('datarefresh', function(event) {
+    var query = event.detail.query;
+
+    total.innerHTML = "Page " + (query.page + 1) + " of " + (query.max_pages + 1);
+
+    prevButton.disabled = query.page <= 0;
+    nextButton.disabled = query.page >= query.max_pages;
+  }, true);
+
+  return container;
+}
+
+EmbedSheetRenderer.prototype.renderFilters = function() {
+  var filters = document.createElement('form');
+
 
   for (var i = 0; i < this.options.filters.length; ++i) {
     filters.appendChild(this.renderFilter(this.options.filters[i]));
   }
 
-  filters.appendChild(total);
+  return filters;
+}
 
-  frag.appendChild(filters);
+EmbedSheetRenderer.prototype.setFilterValue = function (elem) {
+  var field = elem.name.slice(7);
 
-  getData();
-  frag.appendChild(tableContainer);
-
-  var jumpToPage = function (page) {
-    _this.page = page;
-    getData();
-    tableContainer.scrollIntoView(true);
-    tableContainer.focus();
+  if (elem.value) {
+    this.filterConditions[field] = elem.type == 'text' ? { '$regex': [elem.value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'] } : { '$aeq': elem.value };
   }
-
-  var prevButton = document.createElement('button');
-  prevButton.innerHTML = "Previous";
-  prevButton.addEventListener('click', function () { if (_this.page > 0) { jumpToPage(_this.page - 1); } }, false);
-  frag.appendChild(prevButton);
-
-  var nextButton = document.createElement('button');
-  nextButton.innerHTML = "Next";
-  nextButton.addEventListener('click', function () { jumpToPage(_this.page + 1); }, false);
-  frag.appendChild(nextButton);
-
-  return frag;
+  else if (field in this.filterConditions) {
+    delete this.filterConditions[field];
+  }
 }
 
 EmbedSheetRenderer.prototype.renderFilter = function (filter) {
@@ -77,6 +121,14 @@ EmbedSheetRenderer.prototype.renderFilter = function (filter) {
 
   var select = document.createElement(filter.textfield ? 'input' : 'select');
   select.name = 'filter_' + filter.col;
+
+  var onChange = function() {
+    this.setFilterValue(select);
+    this.getPagedData(this.activePage);
+  }
+
+  select.addEventListener('change', onChange.bind(this), false);
+  select.addEventListener('keyup', onChange.bind(this), false);
 
   if (!filter.textfield) {
     if (!filter.required) {
@@ -96,6 +148,7 @@ EmbedSheetRenderer.prototype.renderFilter = function (filter) {
     }
   }
 
+  this.setFilterValue(select);
   label.appendChild(select);
   return label;
 }
