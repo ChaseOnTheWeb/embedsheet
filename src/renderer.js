@@ -5,6 +5,23 @@
  * Outputs the matching data in a filterable table.
  */
 
+// Debounce function from Underscore.js (MIT license)
+// Rate limits how many times in a time period the function can execute
+function debounce(func, wait, immediate) {
+  var timeout;
+  return function () {
+    var context = this, args = arguments;
+    var later = function () {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    var callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+}
+
 export default function EmbedSheetRenderer(store, options) {
   this.store = store;
   this.options = options;
@@ -122,10 +139,10 @@ EmbedSheetRenderer.prototype.renderFilter = function (filter) {
   var select = document.createElement(filter.textfield ? 'input' : 'select');
   select.name = 'filter_' + filter.col;
 
-  var onChange = function() {
+  var onChange = debounce(function() {
     this.setFilterValue(select);
     this.getPagedData(this.activePage);
-  }
+  }, 300);
 
   select.addEventListener('change', onChange.bind(this), false);
   select.addEventListener('keyup', onChange.bind(this), false);
