@@ -1,0 +1,31 @@
+/* TODO: make these styles more generic */
+
+.embed-pager {
+  background: #f2f1eb;
+  padding: 0.2em;
+  text-align: right;
+  vertical-align: middle;
+}
+.embed-pager button {
+  width: 10em;
+  padding: 0.2em;
+  border: none;
+  background: #e4dec7;
+  -webkit-appearance: none;
+}
+.embed-pager * {
+  display: inline-block;
+  line-height: 1.5;
+  vertical-align: middle;
+}
+.embed-pager * + * {
+  margin-left: 0.5em;
+}
+
+.embed-filter-label {
+  display: inline-block;
+  margin: 0.5em;
+}
+.embed-filter-input {
+  display: block;
+}
