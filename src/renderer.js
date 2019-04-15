@@ -110,7 +110,7 @@ EmbedSheetRenderer.prototype.renderPager = function () {
 
 EmbedSheetRenderer.prototype.renderFilters = function() {
   var filters = document.createElement('form');
-
+  filters.classList.add('embed-filter-form');
 
   for (var i = 0; i < this.options.filters.length; ++i) {
     filters.appendChild(this.renderFilter(this.options.filters[i]));
@@ -134,9 +134,11 @@ EmbedSheetRenderer.prototype.renderFilter = function (filter) {
   var filterData = this.store.getFilter(filter.col);
 
   var label = document.createElement('label');
+  label.classList.add('embed-filter-label');
   label.textContent = filterData.label;
 
   var select = document.createElement(filter.textfield ? 'input' : 'select');
+  select.classList.add('embed-filter-input');
   select.name = 'filter_' + filter.col;
 
   var onChange = debounce(function() {
