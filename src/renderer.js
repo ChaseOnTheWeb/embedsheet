@@ -52,8 +52,6 @@ EmbedSheetRenderer.prototype.render = function () {
   var updateTable = function (event) {
     var query = event.detail.query;
     tableContainer.innerHTML = this.renderTable(query.data);
-    this.component.scrollIntoView({ behavior: "smooth" });
-    tableContainer.focus();
   }
 
   this.component.addEventListener('datarefresh', updateTable.bind(this), true);
@@ -91,6 +89,8 @@ EmbedSheetRenderer.prototype.renderPager = function () {
       var newPage = this.activePage + Number(event.target.getAttribute('data-pager-jump'));
 
       this.getPagedData(newPage);
+      this.component.scrollIntoView({ behavior: "smooth" });
+      this.component.querySelector('.table-container').focus();
     }
   };
 
