@@ -55,7 +55,7 @@ export default function EmbedSheetData(data, options) {
     columns.map(function (col) { row[col] = sheet[col + i] ? sheet[col + i].v : null; })
     for (var j = 0; j < this.options.filters.length; ++j) {
       var col = this.options.filters[j].col;
-      filters['col' + col].by('value', row[col]) || filters['col' + col].insert({ value: row[col] });
+      row[col] && (filters['col' + col].by('value', row[col]) || filters['col' + col].insert({ value: row[col] }));
     }
     this.items.insert(row);
   }
