@@ -1,6 +1,6 @@
 {
   "name": "embedsheet",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Embed a spreadsheet into your webpage.",
   "main": "dist/embedsheet.js",
   "directories": {
