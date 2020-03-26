@@ -48,7 +48,11 @@ export default function EmbedSheetData(data, options) {
     this.items.ensureIndex(this.options.filters[i].col);
   }
 
-  columns.map(function (col) { this.headers[col] = sheet[col + "1"].v; }, this);
+  columns.map(function (col) {
+    // new Option(str).innerHTML is an easy way to sanitize a string
+    // https://stackoverflow.com/a/22706073
+    this.headers[col] = this.options.column_labels[col] ? new Option(this.options.column_labels[col]).innerHTML : sheet[col + "1"].v;
+  }, this);
 
   for (var i = 2; i <= range.e.r + 1; ++i) {
     var row = {};

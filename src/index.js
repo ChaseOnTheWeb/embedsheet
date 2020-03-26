@@ -12,6 +12,7 @@ var defaultOptions = {
   sortby: [],
   filters: [],
   query: {},
+  column_labels: {},
   rows_per_page: 500
 };
 
@@ -63,6 +64,7 @@ EmbedSheet.fromLink = function (elem) {
           options[opt] = splitOptions(data);
           break;
         case 'query':
+        case 'column_labels':
           try {
             options[opt] = JSON.parse(data);
           } catch (e) {
