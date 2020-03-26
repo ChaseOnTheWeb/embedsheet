@@ -21,6 +21,6 @@ module.exports = (env, argv) => ({
   },
   devtool: argv.mode == 'production' ? 'source-map' : 'cheap-eval-source-map',
   devServer: {
-    contentBase: './examples'
+    contentBase: './example'
   }
 })
