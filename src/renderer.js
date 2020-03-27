@@ -51,7 +51,13 @@ EmbedSheetRenderer.prototype.render = function () {
 
   var updateTable = function (event) {
     var query = event.detail.query;
-    tableContainer.innerHTML = this.renderTable(query.data);
+
+    var existingTable = tableContainer.firstChild;
+    if (existingTable) {
+      tableContainer.removeChild(existingTable);
+    }
+
+    tableContainer.appendChild(this.renderTable(query.data));
   }
 
   this.component.addEventListener('datarefresh', updateTable.bind(this), true);
@@ -173,15 +179,51 @@ EmbedSheetRenderer.prototype.renderFilter = function (filter) {
 }
 
 EmbedSheetRenderer.prototype.renderTable = function (data) {
-  var headerrow = this.options.columns.map(function (v) { return '<th>' + this.store.headers[v] + '</th>'; }, this).join('');
+  var table = document.createElement('table');
+  var thead = document.createElement('thead');
+  var tbody = document.createElement('tbody');
 
-  var output = '<table class="embed-sheet-table">';
-  output += '<thead><tr>' + headerrow + '</tr></thead>';
+  table.className = 'embed-sheet-table';
+
+  this.options.columns.map(function (v) {
+    var th = document.createElement('th');
+    th.appendChild(document.createTextNode(this.store.headers[v]));
+    return th;
+  }, this).forEach(function(el) {
+    thead.appendChild(el);
+  });
+
   for (var i = 0, l = data.length; i < l; ++i) {
-    var row = this.options.columns.map(function (v) { return '<td>' + data[i][v] + '</td>' }).join('');
-    output += '<tr>' + row + '</tr>';
+    tbody.appendChild(this.renderTableRow(data[i]));
   }
-  output += '</table>';
 
-  return output;
+  table.appendChild(thead);
+  table.appendChild(tbody);
+
+  return table;
+}
+
+EmbedSheetRenderer.prototype.renderTableRow = function(data) {
+  data = Object.assign({}, data);
+  for (var p in this.options.row_processors) {
+    if (p in EmbedSheet.rowProcessors) {
+      var args = Array.isArray(this.options.row_processors[p]) ? [data].concat(this.options.row_processors[p]) : [data];
+      EmbedSheet.rowProcessors[p].apply(null, args);
+    }
+  }
+
+  var tr = document.createElement('tr');
+  var row = this.options.columns.map(function (v) {
+    // A row processor may have returned a node for a field if it wants to
+    // output HTML. Data from the sheet should be treated as text and is thus
+    // sanitized.
+    var node = data[v] instanceof Node ? data[v] : document.createTextNode(data[v]);
+    var td = document.createElement('td');
+    td.appendChild(node);
+
+    return td;
+  });
+
+  row.forEach(function (td) { tr.appendChild(td); });
+  return tr;
 }

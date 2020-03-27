@@ -25,11 +25,15 @@ export default function EmbedSheetData(data, options) {
   var filters = {};
 
   if (this.options.columns) {
+    // If we are only displaying certain columns, we will only load those into
+    // memory for performance purposes. However, we also need to include
+    // columns used for sorting, filtering, row processors, and custom queries.
     var columns = this.options.columns
       .concat(
         this.options.sortby.map(function (v) { return Array.isArray(v) ? v[0] : v; }),
         this.options.filters.map(function (v) { return v.col; }),
-        Object.keys(this.options.query)
+        Object.keys(this.options.query),
+        Object.values(this.options.row_processors).reduce((acc, cur) => acc.concat(Array.isArray(cur) ? cur : []), [])
         )
       .sort()
       .filter(function (v, i, a) { return v != a[i - 1]; });
@@ -49,9 +53,7 @@ export default function EmbedSheetData(data, options) {
   }
 
   columns.map(function (col) {
-    // new Option(str).innerHTML is an easy way to sanitize a string
-    // https://stackoverflow.com/a/22706073
-    this.headers[col] = this.options.column_labels[col] ? new Option(this.options.column_labels[col]).innerHTML : sheet[col + "1"].v;
+    this.headers[col] = this.options.column_labels[col] ? this.options.column_labels[col] : sheet[col + "1"].v;
   }, this);
 
   for (var i = 2; i <= range.e.r + 1; ++i) {

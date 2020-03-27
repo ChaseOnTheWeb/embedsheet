@@ -3,18 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title></title>
-  <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,fetch"></script>
-  <script src="https://unpkg.com/xlsx/dist/shim.min.js"></script>
-  <script src="embedsheet.js"></script>
+  <script type="text/javascript">
+    document.addEventListener('embedsheetload', function (evt) {
+      var register = evt.detail.EmbedSheet.registerRowProcessor;
+
+      register('link_year', function(row, year) {
+        var link = document.createElement('a');
+        link.href = 'https://en.wikipedia.org/wiki/' + row[year];
+        link.innerText = row[year];
+        row[year] = link;
+      });
+    });
+  </script>
 </head>
 <body>
   <a href="./hads-2013.csv"
     data-embed-type="sheet"
     data-sheet-columns="A,C,E,H,K,L,D,BD,BE"
+    data-sheet-row-processors="{&quot;link_year&quot;: [&quot;E&quot;]}"
     data-sheet-column-labels="{&quot;E&quot;: &quot;Something cool&quot;}"
     data-sheet-sortby="A"
     data-sheet-filters="*BE,D"
     data-sheet-rows-per-page="100"
     >Download HADS 2013 (CSV)</a>
+
+  <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,fetch"></script>
+  <script src="https://unpkg.com/xlsx/dist/shim.min.js"></script>
+  <script src="embedsheet.js"></script>
 </body>
 </html>

@@ -11,6 +11,7 @@ var defaultOptions = {
   columns: [],
   sortby: [],
   filters: [],
+  row_processors: {},
   query: {},
   column_labels: {},
   rows_per_page: 500
@@ -63,6 +64,7 @@ EmbedSheet.fromLink = function (elem) {
         case 'filters':
           options[opt] = splitOptions(data);
           break;
+        case 'row_processors':
         case 'query':
         case 'column_labels':
           try {
@@ -87,6 +89,11 @@ EmbedSheet.fromLinks = function () {
   for (var i=0; i < links.length; ++i) {
     EmbedSheet.fromLink(links[i]);
   }
+}
+
+EmbedSheet.rowProcessors = {};
+EmbedSheet.registerRowProcessor = function(name, callback) {
+  EmbedSheet.rowProcessors[name] = callback;
 }
 
 function parseOptions(userOptions) {
@@ -120,3 +127,8 @@ function parseOptions(userOptions) {
 }
 
 onReady(EmbedSheet.fromLinks);
+
+// Let subscribers know when EmbedSheet object is ready, so that they can
+// register row processors.
+var event = new CustomEvent('embedsheetload', { detail: { EmbedSheet: EmbedSheet }});
+document.dispatchEvent(event);
