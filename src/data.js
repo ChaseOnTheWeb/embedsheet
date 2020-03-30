@@ -33,7 +33,7 @@ export default function EmbedSheetData(data, options) {
         this.options.sortby.map(function (v) { return Array.isArray(v) ? v[0] : v; }),
         this.options.filters.map(function (v) { return v.col; }),
         Object.keys(this.options.query),
-        Object.values(this.options.row_processors).reduce((acc, cur) => acc.concat(Array.isArray(cur) ? cur : []), [])
+        Object.values(this.options.row_processors).reduce(function (acc, cur) { return acc.concat(Array.isArray(cur) ? cur : []) }, [])
         )
       .sort()
       .filter(function (v, i, a) { return v != a[i - 1]; });
