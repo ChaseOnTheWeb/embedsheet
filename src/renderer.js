@@ -217,9 +217,13 @@ EmbedSheetRenderer.prototype.renderTableRow = function(data) {
     // A row processor may have returned a node for a field if it wants to
     // output HTML. Data from the sheet should be treated as text and is thus
     // sanitized.
-    var node = data[v] instanceof Node ? data[v] : document.createTextNode(data[v]);
     var td = document.createElement('td');
-    td.appendChild(node);
+    if (data[v] instanceof Node) {
+      td.appendChild(data[v]);
+    }
+    else if (data[v]) {
+      td.appendChild(document.createTextNode(data[v]));
+    }
 
     return td;
   });
