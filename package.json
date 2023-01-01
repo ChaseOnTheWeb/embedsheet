@@ -24,8 +24,8 @@
   "devDependencies": {
     "codepage": "^1.14.0",
     "lokijs": "^1.5.8",
-    "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^3.10.3",
     "xlsx": "^0.14.5"
   }
